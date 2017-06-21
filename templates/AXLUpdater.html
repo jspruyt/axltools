@@ -1,0 +1,35 @@
+<html>
+{% include "html_head.html" %}
+<body>
+<div id="main">
+	{% include "header.html" %}
+
+	<div class="pure-g">
+		<div class="pure-u-2-3">
+		<div id="content">
+			<h2>Information</h2>
+			<p>The AXL function defined in the YAML definition file will be executed for each line in the CSV file. The variables in the YAML file will be replaced by the corresponding value from the CSV file. If you want to execute multiple functions, put each YAML definition between --- and ...
+			</p>
+			<form action="AXLUpdater.php" method="post" id="form" class="pure-form pure-form-aligned" enctype="multipart/form-data">
+				<fieldset>
+					<div class="pure-control-group">
+						<label for="csv">CSV</label>
+						<textarea class="pure-input-2-3" type="text" name="csv" rows="8" placeholder="Paste your CSV file here with headers">{{ form.csv }}</textarea>
+					</div>
+					<div class="pure-control-group">
+						<label for="yaml">YAML Definition</label>
+						<textarea class="pure-input-2-3" type="text" name="yaml" rows="8" placeholder="Paste your AXL function definition file here">{{ form.yaml }}</textarea>
+					</div>
+					
+					<div class="pure-controls">
+						<button type="submit" name="submit" class="pure-button pure-button-primary">Submit</button>
+					</div>
+					
+				</fieldset>
+			</form>
+		</div>
+		</div>
+		{% include "output.html" %}
+	</div>
+</body>
+</html>

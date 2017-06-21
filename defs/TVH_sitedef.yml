@@ -1,0 +1,370 @@
+---
+variable_labels:
+  - {name: cc, label: Country code (2-char)}
+  - {name: sn, label: Site Name}
+  - {name: gateway, label: Gateway Host Name}
+  - {name: country, label: Country Name}
+  - {name: e164cc, label: Country Code Telephony (no +)}
+  - {name: shortextension, label: Short extension pattern}
+  - {name: extensionmask, label: label extension mask (with +)}
+  - {name: isDID, label: Type "DID" or "non-DID"}
+...
+---
+function: addLocation
+arguments:
+  location:
+    name: %cc%-%sn%
+    withinAudioBandwidth: 0
+    withinVideoBandwidth: 0
+    withinImmersiveKbits: 0
+    betweenLocations:
+      betweenLocation:
+        locationName: hub_none
+        weight: 50
+        audioBandwidth: 0
+        videoBandwidth: 384
+        immersiveBandwidth: 384
+...
+---
+function: addRegion
+arguments:
+  region:
+    name: %cc%-%sn%
+    relatedRegions:
+      relatedRegion:
+        regionName: SYSTEMS
+        bandwidth: 64
+        videoBandwidth: 0
+        codecPreference: Factory Default low loss
+        immersiveVideoBandwidth: 0
+...
+---
+function: addSrst
+arguments:
+  srst:
+    name: %cc%-%sn%
+    port: "2000"
+    ipAddress: %gatewayip%
+    SipNetwork: %gatewayip%
+    SipPort: "5060"
+...
+---
+function: addRoutePartition
+options:
+  multiple: true
+  dependency: isnewcountry
+arguments:
+  - routePartition: {name: %cc%-Normalize, description: %cc% dialing habits to +E164}
+  - routePartition: {name: %cc%-Translations, description: Translations for inbound calls}
+  - routePartition: {name: %cc%-Localize, description: Calling Party Transformations}
+  - routePartition: {name: %cc%-Restrict-E164-International, description: Restrict International Calls}
+  - routePartition: {name: %cc%-Restrict-E164-Mobile, description: Restrict Mobile Calls}
+  - routePartition: {name: %cc%-Restrict-E164-National, description: Restrict National Calls}
+  - routePartition: {name: %cc%-Restrict-E164-Premium, description: Restrict Premium Calls}
+  - routePartition: {name: %cc%-Restrict-E164-Service, description: Restrict Service Calls}
+...
+---
+function: addRoutePartition
+arguments:
+  routePartition: {name: %cc%-%sn%-Emergency, description: Emergency Patterns for %sn%}
+...
+---
+function: addCSS
+options:
+  multiple: true
+  dependency: isnewcountry
+arguments:
+  - css:
+      name: %cc%-Inbound
+      description: CSS for Inbound Calls VGW
+      members:
+        member:
+          - {routePartitionName: VGW-IN-PRIO, index: 1}
+          - {routePartitionName: %cc%-Translations, index: 2}
+          - {routePartitionName: Global-Routing, index: 3}
+          - {routePartitionName: INTERNAL-EXTENSIONS, index: 4}
+  - css:
+      name: %cc%-Line-E164-Internal
+      description: Line CSS for Internal Calls Only
+      members:
+        member:
+          - {routePartitionName: %cc%-Restrict-E164-Premium, index: 1}
+          - {routePartitionName: %cc%-Restrict-E164-International, index: 2}
+          - {routePartitionName: %cc%-Restrict-E164-Mobile, index: 3}
+          - {routePartitionName: %cc%-Restrict-E164-National, index: 4}
+          - {routePartitionName: %cc%-Restrict-E164-Service, index: 5}
+  - css:
+      name: %cc%-Line-E164-National
+      description: Line CSS for National Calls Only
+      members:
+        member:
+          - {routePartitionName: %cc%-Restrict-E164-Premium, index: 1}
+          - {routePartitionName: %cc%-Restrict-E164-International, index: 2}
+  - css:
+      name: %cc%-Line-E164-International
+      description: Line CSS for International Calls Only
+      members:
+        member:
+          - {routePartitionName: %cc%-Restrict-E164-Premium, index: 1}
+  - css:
+      name: %cc%-CFWD-E164-Internal
+      description: Call Forward CSS for Internal destinations
+      members:
+        member:
+          - {routePartitionName: %cc%-Restrict-E164-Premium, index: 1}
+          - {routePartitionName: %cc%-Restrict-E164-International, index: 2}
+          - {routePartitionName: %cc%-Restrict-E164-Mobile, index: 3}
+          - {routePartitionName: %cc%-Restrict-E164-National, index: 4}
+          - {routePartitionName: %cc%-Restrict-E164-Service, index: 5}
+          - {routePartitionName: %cc%-Normalize, index: 6}
+          - {routePartitionName: Global-Blocking, index: 7}
+          - {routePartitionName: Global-Routing, index: 8}
+          - {routePartitionName: PSTN-Routing, index: 9}
+          - {routePartitionName: INTERNAL-EXTENSIONS, index: 10}
+  - css:
+      name: %cc%-CFWD-E164-National
+      description: Call Forward CSS for National destinations
+      members:
+        member:
+          - {routePartitionName: %cc%-Restrict-E164-Premium, index: 1}
+          - {routePartitionName: %cc%-Restrict-E164-International, index: 2}
+          - {routePartitionName: %cc%-Normalize, index: 3}
+          - {routePartitionName: Global-Blocking, index: 4}
+          - {routePartitionName: Global-Routing, index: 5}
+          - {routePartitionName: PSTN-Routing, index: 6}
+          - {routePartitionName: INTERNAL-EXTENSIONS, index: 7}
+  - css:
+      name: %cc%-CFWD-E164-International
+      description: Call Forward CSS for International destinations
+      members:
+        member:
+          - {routePartitionName: %cc%-Restrict-E164-Premium, index: 1}
+          - {routePartitionName: %cc%-Normalize, index: 2}
+          - {routePartitionName: Global-Blocking, index: 3}
+          - {routePartitionName: Global-Routing, index: 4}
+          - {routePartitionName: PSTN-Routing, index: 5}
+          - {routePartitionName: INTERNAL-EXTENSIONS, index: 6}
+  - css:
+      name: %cc%-Localize
+      description: Calling Party Transformations to Localize numbers
+...
+---
+function: addCSS
+arguments:
+  css:
+    name: %cc%-%sn%-Phones
+    description: CSS for all devices
+    members:
+      member:
+        - {routePartitionName: %cc%-Normalize, index: 1}
+        - {routePartitionName: %cc%-%sn%-Emergency, index: 2}
+        - {routePartitionName: Global-Blocking, index: 3}
+        - {routePartitionName: Global-Routing, index: 4}
+        - {routePartitionName: PSTN-Routing, index: 5}
+        - {routePartitionName: INTERNAL-EXTENSIONS, index: 6}
+...
+---
+function: addCommonDeviceConfig
+arguments:
+  commonDeviceConfig:
+    name: %cc%-%sn%
+    userLocale: English United States
+    networkHoldMohAudioSourceId: 1
+    userHoldMohAudioSourceId: 1
+...
+---
+function: addDevicePool
+options:
+  multiple: true
+arguments:
+  - devicePool:
+      name: %cc%-%sn%-PHONE
+      dateTimeSettingName: %datetimegroup%
+      callManagerGroupName: %callmanagergroup%
+      regionName: %cc%-%sn%
+      srstName: %cc%-%sn%
+      aarneighborhoodName: NULL
+  - devicePool:
+      name: %cc%-%sn%-VGW
+      dateTimeSettingName: %datetimegroup%
+      callManagerGroupName: %callmanagergroup%
+      regionName: %cc%-%sn%
+      srstName: %cc%-%sn%
+      aarneighborhoodName: NULL
+...
+---
+function: addConferenceBridge
+arguments:
+  conferenceBridge:
+    name: %cc%-%sc%-VGW-CFB
+    description: Conference Bridge Resources on %gateway%
+    product: Cisco IOS Enhanced Conference Bridge
+    locationName: %cc%-%sn%
+    devicePoolName: %cc%-%sn%-VGW
+...
+---
+function: addMtp
+arguments:
+  mtp:
+    name: %cc%-%sc%-VGW-MTP
+    mtpType: Cisco IOS Enhanced Software Media Termination Point
+    devicePoolName: %cc%-%sn%-VGW
+    description: MTP Resources on %gateway%
+...
+---
+function: addMediaResourceGroup
+options:
+  multiple: true
+arguments:
+  - mediaResourceGroup:
+      name: %cc%-%sc%-VGW-CFB
+      multicast: f
+      members:
+        member:
+          deviceName: %cc%-%sc%-VGW-CFB
+  - mediaResourceGroup:
+      name: %cc%-%sc%-VGW-MTP
+      multicast: f
+      members:
+        member:
+          deviceName: %cc%-%sc%-VGW-MTP
+...
+---
+function: addMediaResourceList
+options:
+  multiple: true
+arguments:
+  - mediaResourceList:
+      name: %cc%-%sn%-PHONE
+      members:
+        member: &mrglMembers
+#          - {mediaResourceGroupName: MTP2 , order: 0}
+#          - {mediaResourceGroupName: Conductor_MRG , order: 1}
+          - {mediaResourceGroupName: ANN-SUB , order: 0}
+          - {mediaResourceGroupName: CFB-SUB , order: 1}
+          - {mediaResourceGroupName: MOH-SUB , order: 2}
+          - {mediaResourceGroupName: MTP-SUB , order: 3}
+          - {mediaResourceGroupName: ANN-PUB , order: 4}
+          - {mediaResourceGroupName: CFB-PUB , order: 5}
+          - {mediaResourceGroupName: MOH-PUB , order: 6}
+          - {mediaResourceGroupName: MTP-PUB , order: 7}
+  - mediaResourceList:
+      name: %cc%-%sn%-VGW
+      members:
+        member: *mrglMembers
+...
+---
+function: addSipTrunk
+arguments:
+  sipTrunk:
+    name: %gateway%
+    description: SIP Trunk to VGW %sn%
+    product: SIP Trunk
+    class: Trunk
+    protocol: SIP
+    protocolSide: Network
+    networkLocation: OffNet
+    devicePoolName: %cc%-%sn%-VGW
+    locationName: %cc%-%sn%
+    callingSearchSpaceName: %cc%-Inbound
+    commonDeviceConfigName: %cc%-%sn%
+    mediaResourceListName: %cc%-%sn%-VGW
+    securityProfileName: VGW
+    sipProfileName: Standard SIP Profile for VGW
+    subscribeCallingSearchSpaceName: Internal
+    rerouteCallingSearchsPaceName: Internal
+    referCallingSearchSPaceName: Internal
+    presenceGroupName: Standard Presence group
+    sigDigits: 99
+    dtmfSignalingMethod: RFC 2833
+    callingAndCalledPartyInfoFormat: Deliver DN only in connected party
+    destinations:
+      destination:
+        addressIpv4: %gatewayip%
+        port: 5060
+        sortOrder: 1
+...
+---
+function: addRouteGroup
+arguments:
+  routeGroup:
+    name: %cc%-%sn%
+    distributionAlgorithm: Top Down
+    members:
+      member:
+        deviceName: %gateway%
+        deviceSelectionOrder: 0
+        port: 0
+...
+---
+function: addRouteList
+arguments:
+  routeList:
+    name: %cc%-%sn%
+    callManagerGroupName: %callmanagergroup%
+    runOnEveryNode: t
+    routeListEnabled: t
+    description: PSTN %country% - %sn%
+    members:
+      member:
+        routeGroupName: %cc%-%sn%
+        selectionOrder: 0
+        useFullyQualifiedCallingPartyNumber: Default
+...
+---
+function: addRoutePattern
+options:
+  multiple: true
+arguments:
+  - routePattern:
+      pattern: 112
+      description: %cc% Emergency Calls
+      routePartitionName: %cc%-%sn%-Emergency
+      blockEnable: f
+      useCallingPartyPhoneMask: "On"
+      digitDiscardInstructionName: NULL
+      networkLocation: OffNet
+      prefixDigitsOut: "+%e164cc%"
+      destination:
+        routeListName: %cc%-%sn%
+  - routePattern:
+      pattern: "[09].112"
+      description: %cc% Emergency Calls
+      routePartitionName: %cc%-%sn%-Emergency
+      blockEnable: f
+      useCallingPartyPhoneMask: "On"
+      digitDiscardInstructionName: PreDot
+      networkLocation: OffNet
+      prefixDigitsOut: "+%e164cc%"
+      routeFilterName: NULL
+      destination:
+        routeListName: %cc%-%sn%
+...
+---
+function: addTransPattern
+arguments:
+  transPattern:
+    pattern: %shortextension%
+    description: %cc% %sn% %isDID% range
+    usage: Translation
+    routePartitionName: %cc%-Normalize
+    patternUrgency: t
+    callingSearchSpaceName: Internal
+    calledPartyTransformationMask: %extensionmask%
+...
+---
+function: updateDevicePool
+options:
+  multiple: true
+arguments:
+  - name: %cc%-%sn%-PHONE
+    mediaResourceListName:
+    localRouteGroup:
+      name: Standard Local Route Group
+      value: %cc%-%sn%
+  - name: %cc%-%sn%-VGW
+    mediaResourceListName:
+    localRouteGroup:
+      name: Standard Local Route Group
+      value: %cc%-%sn%
+...

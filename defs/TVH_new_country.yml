@@ -1,0 +1,97 @@
+---
+variable_labels:
+ - {name: cc, label: Country code (2-char)}
+...
+---
+function: addRoutePartition
+options:
+  multiple: true
+arguments:
+  - routePartition: {name: %cc%-Normalize, description: %cc% dialing habits to +E164}
+  - routePartition: {name: %cc%-Translations, description: Translations for inbound calls}
+  - routePartition: {name: %cc%-Localize, description: Calling Party Transformations}
+  - routePartition: {name: %cc%-Restrict-E164-International, description: Restrict International Calls}
+  - routePartition: {name: %cc%-Restrict-E164-Mobile, description: Restrict Mobile Calls}
+  - routePartition: {name: %cc%-Restrict-E164-National, description: Restrict National Calls}
+  - routePartition: {name: %cc%-Restrict-E164-Premium, description: Restrict Premium Calls}
+  - routePartition: {name: %cc%-Restrict-E164-Service, description: Restrict Service Calls}
+...
+---
+function: addCSS
+options:
+  multiple: true
+arguments:
+  - css:
+      name: %cc%-Inbound
+      description: CSS for Inbound Calls VGW
+      members:
+        member:
+          - {routePartitionName: VGW-IN-PRIO, index: 1}
+          - {routePartitionName: %cc%-Translations, index: 2}
+          - {routePartitionName: Global-Routing, index: 3}
+          - {routePartitionName: INTERNAL-EXTENSIONS, index: 4}
+  - css:
+      name: %cc%-Line-E164-Internal
+      description: Line CSS for Internal Calls Only
+      members:
+        member:
+          - {routePartitionName: %cc%-Restrict-E164-Premium, index: 1}
+          - {routePartitionName: %cc%-Restrict-E164-International, index: 2}
+          - {routePartitionName: %cc%-Restrict-E164-Mobile, index: 3}
+          - {routePartitionName: %cc%-Restrict-E164-National, index: 4}
+          - {routePartitionName: %cc%-Restrict-E164-Service, index: 5}
+  - css:
+      name: %cc%-Line-E164-National
+      description: Line CSS for National Calls Only
+      members:
+        member:
+          - {routePartitionName: %cc%-Restrict-E164-Premium, index: 1}
+          - {routePartitionName: %cc%-Restrict-E164-International, index: 2}
+  - css:
+      name: %cc%-Line-E164-International
+      description: Line CSS for International Calls Only
+      members:
+        member:
+          - {routePartitionName: %cc%-Restrict-E164-Premium, index: 1}
+  - css:
+      name: %cc%-CFWD-E164-Internal
+      description: Call Forward CSS for Internal destinations
+      members:
+        member:
+          - {routePartitionName: %cc%-Restrict-E164-Premium, index: 1}
+          - {routePartitionName: %cc%-Restrict-E164-International, index: 2}
+          - {routePartitionName: %cc%-Restrict-E164-Mobile, index: 3}
+          - {routePartitionName: %cc%-Restrict-E164-National, index: 4}
+          - {routePartitionName: %cc%-Restrict-E164-Service, index: 5}
+          - {routePartitionName: %cc%-Normalize, index: 6}
+          - {routePartitionName: Global-Blocking, index: 7}
+          - {routePartitionName: Global-Routing, index: 8}
+          - {routePartitionName: PSTN-Routing, index: 9}
+          - {routePartitionName: INTERNAL-EXTENSIONS, index: 10}
+  - css:
+      name: %cc%-CFWD-E164-National
+      description: Call Forward CSS for National destinations
+      members:
+        member:
+          - {routePartitionName: %cc%-Restrict-E164-Premium, index: 1}
+          - {routePartitionName: %cc%-Restrict-E164-International, index: 2}
+          - {routePartitionName: %cc%-Normalize, index: 3}
+          - {routePartitionName: Global-Blocking, index: 4}
+          - {routePartitionName: Global-Routing, index: 5}
+          - {routePartitionName: PSTN-Routing, index: 6}
+          - {routePartitionName: INTERNAL-EXTENSIONS, index: 7}
+  - css:
+      name: %cc%-CFWD-E164-International
+      description: Call Forward CSS for International destinations
+      members:
+        member:
+          - {routePartitionName: %cc%-Restrict-E164-Premium, index: 1}
+          - {routePartitionName: %cc%-Normalize, index: 2}
+          - {routePartitionName: Global-Blocking, index: 3}
+          - {routePartitionName: Global-Routing, index: 4}
+          - {routePartitionName: PSTN-Routing, index: 5}
+          - {routePartitionName: INTERNAL-EXTENSIONS, index: 6}
+  - css:
+      name: %cc%-Localize
+      description: Calling Party Transformations to Localize numbers
+...

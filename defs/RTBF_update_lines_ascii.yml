@@ -1,0 +1,58 @@
+---
+variable_labels:
+  - {name: display, label: Display Name}
+  - {name: dn, label: Full +E.164 DN}
+  - {name: userid, label: User ID}
+...
+---
+function: updatePhone
+arguments:
+  debuginfo: CSF%userid|upper%
+  name: CSF%userid|upper%
+  lines:
+    line:
+      index: 1
+      displayAscii: %display|ascii%
+      dirn:
+        pattern: \%dn%
+        routePartitionName: Internal
+...
+---
+function: updatePhone
+arguments:
+  debuginfo: BOT%userid|upper%
+  name: BOT%userid|upper%
+  lines:
+    line:
+      index: 1
+      displayAscii: %display|ascii%
+      dirn:
+        pattern: \%dn%
+        routePartitionName: Internal
+...
+---
+function: updatePhone
+arguments:
+  debuginfo: TCT%userid|upper%
+  name: TCT%userid|upper%
+  lines:
+    line:
+      index: 1
+      displayAscii: %display|ascii%
+      dirn:
+        pattern: \%dn%
+        routePartitionName: Internal
+...
+---
+function: updateDeviceProfile
+arguments:
+  debuginfo: UDP%userid|upper%
+  name: UDP%userid|upper%
+  lines:
+    line:
+      index: 1
+      displayAscii: %display|ascii%
+      dirn:
+        pattern: \%dn%
+        routePartitionName: Internal
+...

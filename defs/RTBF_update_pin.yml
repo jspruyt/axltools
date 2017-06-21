@@ -1,0 +1,11 @@
+---
+variable_labels:
+  - {name: userid, label: User ID}
+...
+---
+function: updateUser
+arguments:
+  debuginfo: %userid% PIN update
+  userid: %userid%
+  pin: %pin%
+...

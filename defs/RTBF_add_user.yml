@@ -1,0 +1,329 @@
+---
+variable_labels:
+  - {name: first, label: First Name}
+  - {name: last, label: Last Name}
+  - {name: display, label: Display Name}
+  - {name: site, label: Site code (2/3 characters)}
+  - {name: dn, label: Full +E.164 DN}
+  - {name: userid, label: User ID}
+  - {name: cor, label: COR (Internal, National, International)}
+  - {name: vmtemplate, label: Voicemail template name}
+  - {name: 4digit, label: Last 4 digits of the DN}
+...
+---
+function: cupiImportUser
+arguments:
+  debuginfo: %userid% Voicemail Creation
+  alias: %userid%
+  dtmfAccessId: "%dn%"
+...
+---
+function: updateUser
+arguments:
+  debuginfo: %userid% basic settings
+  userid: %userid%
+  homeCluster: t
+  imAndPresenceEnable: t
+  calendarPresence: t
+  enableCti: t
+  serviceProfile: RTBF
+#    _: 4df2708c-43cd-a5cc-b157-66c333ab80d4
+  enableMobility: t
+  remoteDestinationLimit: 2
+  subscribeCallingSearchSpaceName: Internal-Cisco-Only
+  associatedGroups:
+    userGroup:
+      name: RTBF End Users
+...
+---
+function: addLine
+arguments:
+  debuginfo: "%dn%"
+  line:
+    pattern: \%dn%
+    usage: Device
+    description: %display%|%userid%
+    routePartitionName: Internal-Inactive
+    alertingName: %display%
+    asciiAlertingName: %display|ascii%
+    voiceMailProfileName: RTBF
+    patternUrgency: t
+    shareLineAppearanceCssName: Line-%cor%
+    callForwardAll:
+      callingSearchSpaceName: Line-National
+      secondaryCallingSearchSpaceName: NULL
+    callForwardBusy:
+      callingSearchSpaceName: Line-National
+      forwardToVoiceMail: t
+    callForwardBusyInt:
+      callingSearchSpaceName: Line-National
+      forwardToVoiceMail: t
+    callForwardNoAnswer:
+      callingSearchSpaceName: Line-National
+      forwardToVoiceMail: t
+    callForwardNoAnswerInt:
+      callingSearchSpaceName: Line-National
+      forwardToVoiceMail: t
+    callForwardOnFailure:
+      callingSearchSpaceName: Line-National
+      forwardToVoiceMail: t
+    callForwardNotRegistered:
+      callingSearchSpaceName: Line-National
+      forwardToVoiceMail: t
+    callForwardNotRegisteredInt:
+      callingSearchSpaceName: Line-National
+      forwardToVoiceMail: t
+...
+---
+function: addPhone
+arguments:
+  debuginfo: CSF%userid|upper%
+  phone:
+    name: CSF%userid|upper%
+    description: %display%|J4W|nomade
+    product: Cisco Unified Client Services Framework
+    class: Phone
+    protocol: SIP
+    protocolSide: User
+    callingSearchSpaceName: %site%-Device
+    rerouteCallingSearchSpaceName: Line-National
+    softkeyTemplateName: RTBF User
+    devicePoolName: %site%
+    commonDeviceConfigName: RTBF
+    commonPhoneConfigName: RTBF Common Phone Profile
+    locationName: %site%
+    securityProfileName: Universal Device Template - Model-independent Security Profile
+    sipProfileName: Jabber Windows SIP Profile
+    phoneTemplateName: Standard Client Services Framework
+    userLocale: French France
+    networkLocale: Belgium
+    ownerUserName: %userid%
+    mobilityUserIdName: %userid%
+    builtInBridgeStatus: Default
+    deviceMobilityMode: Default
+    useTrustedRelayPoint: Default
+    packetCaptureMode: None
+    certificateOperation: No Pending Operation
+    primaryPhoneName: NULL
+    lines:
+      line:
+        index: 1
+        display: %display%
+        displayAscii: %display|ascii%
+        label: "%display% - %4digit%"
+        dirn:
+          pattern: \%dn%
+          routePartitionName: Internal-Inactive
+        busyTrigger: 1
+        associatedEndusers:
+          enduser:
+            userId: %userid%
+...
+---
+function: addPhone
+arguments:
+  debuginfo: BOT%userid|upper%
+  phone:
+    name: BOT%userid|upper%
+    description: %display%|J4A|nomade
+    product: Cisco Dual Mode for Android
+    class: Phone
+    protocol: SIP
+    protocolSide: User
+    callingSearchSpaceName: %site%-Device
+    rerouteCallingSearchSpaceName: Line-National
+    useDevicePoolCgpnTransformCss: f
+    softkeyTemplateName: RTBF User
+    devicePoolName: %site%
+    commonDeviceConfigName: RTBF
+    commonPhoneConfigName: RTBF Common Phone Profile
+    locationName: %site%
+    securityProfileName: Universal Device Template - Model-independent Security Profile
+    sipProfileName: Jabber Mobile SIP Profile
+    phoneTemplateName: Standard Dual Mode for Android
+    userLocale: French France
+    networkLocale: Belgium
+    ownerUserName: %userid%
+    mobilityUserIdName: %userid%
+    builtInBridgeStatus: Default
+    deviceMobilityMode: Default
+    useTrustedRelayPoint: Default
+    packetCaptureMode: None
+    certificateOperation: No Pending Operation
+    primaryPhoneName: CSF%userid|upper%
+    lines:
+      line:
+        index: 1
+        display: %display%
+        displayAscii: %display|ascii%
+        label: "%display% - %4digit%"
+        dirn:
+          pattern: \%dn%
+          routePartitionName: Internal-Inactive
+        busyTrigger: 1
+        associatedEndusers:
+          enduser:
+            userId: %userid%
+...
+---
+function: addPhone
+arguments:
+  debuginfo: TCT%userid|upper%
+  phone:
+    name: TCT%userid|upper%
+    description: %display%|J4I|nomade
+    product: Cisco Dual Mode for iPhone
+    class: Phone
+    protocol: SIP
+    protocolSide: User
+    callingSearchSpaceName: %site%-Device
+    rerouteCallingSearchSpaceName: Line-National
+    useDevicePoolCgpnTransformCss: f
+    softkeyTemplateName: RTBF User
+    devicePoolName: %site%
+    commonDeviceConfigName: RTBF
+    commonPhoneConfigName: RTBF Common Phone Profile
+    locationName: %site%
+    securityProfileName: Universal Device Template - Model-independent Security Profile
+    sipProfileName: Jabber Mobile SIP Profile
+    phoneTemplateName: Standard Dual Mode for iPhone
+    userLocale: French France
+    networkLocale: Belgium
+    ownerUserName: %userid%
+    mobilityUserIdName: %userid%
+    builtInBridgeStatus: Default
+    deviceMobilityMode: Default
+    useTrustedRelayPoint: Default
+    packetCaptureMode: None
+    certificateOperation: No Pending Operation
+    primaryPhoneName: CSF%userid|upper%
+    lines:
+      line:
+        index: 1
+        display: %display%
+        displayAscii: %display|ascii%
+        label: "%display% - %4digit%"
+        dirn:
+          pattern: \%dn%
+          routePartitionName: Internal-Inactive
+        busyTrigger: 1
+        associatedEndusers:
+          enduser:
+            userId: %userid%
+...
+---
+function: addPhone
+options:
+  dependency: needsTablet
+arguments:
+  debuginfo: TAB%userid|upper%
+  phone:
+    name: TAB%userid|upper%
+    description: %display%|J4T|nomade
+    product: Cisco Jabber for Tablet
+    class: Phone
+    protocol: SIP
+    protocolSide: User
+    callingSearchSpaceName: %site%-Device
+    rerouteCallingSearchSpaceName: Line-National
+    softkeyTemplateName: RTBF User
+    devicePoolName: %site%
+    commonDeviceConfigName: RTBF
+    commonPhoneConfigName: RTBF Common Phone Profile
+    locationName: %site%
+    securityProfileName: Universal Device Template - Model-independent Security Profile
+    sipProfileName: Jabber Mobile SIP Profile
+    phoneTemplateName: Standard Jabber for Tablet
+    userLocale: French France
+    networkLocale: Belgium
+    ownerUserName: %userid%
+    mobilityUserIdName: %userid%
+    builtInBridgeStatus: Default
+    deviceMobilityMode: Default
+    useTrustedRelayPoint: Default
+    packetCaptureMode: None
+    certificateOperation: No Pending Operation
+    primaryPhoneName: CSF%userid|upper%
+    lines:
+      line:
+        index: 1
+        display: %display%
+        displayAscii: %display|ascii%
+        label: "%display% - %4digit%"
+        dirn:
+          pattern: \%dn%
+          routePartitionName: Internal-Inactive
+        busyTrigger: 1
+        associatedEndusers:
+          enduser:
+            userId: %userid%
+...
+---
+function: addDeviceProfile
+arguments:
+  debuginfo: UDP%userid|upper%
+  deviceProfile:
+    name: UDP%userid|upper%
+    description: %display%|UDP|nomade
+    product: Cisco 7841
+    class: Device Profile
+    protocol: SIP
+    protocolSide: User
+    securityProfileName: Universal Device Template - Model-independent Security Profile
+    softkeyTemplateName: RTBF User
+    phoneTemplateName: Standard 7841 SIP
+    userLocale: French France
+    lines:
+      line:
+        index: 1
+        display: %display%
+        displayAscii: %display|ascii%
+        label: %display% - %4digit% 
+        dirn:
+          pattern: \%dn%
+          routePartitionName: Internal-Inactive
+        busyTrigger: 1
+        associatedEndusers:
+          enduser:
+            userId: %userid%
+    services:
+      service:
+        telecasterServiceName: Hotdesk
+        name: Logout
+        
+...
+---
+function: updateUser
+arguments:
+  debuginfo: %userid% primary line, devices
+  userid: %userid%
+  pin: %pin%
+  primaryExtension: 
+    pattern: \%dn% 
+    routePartitionName: Internal-Inactive
+  ctiControlledDeviceProfiles:
+    profileName: UDP%userid|upper%
+  associatedDevices:
+    device: 
+      - CSF%userid|upper%
+      - BOT%userid|upper%
+      - TCT%userid|upper%
+  phoneProfiles:
+    profileName: UDP%userid|upper%
+  defaultProfile: UDP%userid|upper%
+...
+---
+function: updateUser
+options:
+  dependency: needsTablet
+arguments:
+  debuginfo: %userid% TAB device association
+  userid: %userid%
+  associatedDevices:
+    device: 
+      - CSF%userid|upper%
+      - BOT%userid|upper%
+      - TCT%userid|upper%
+      - UDP%userid|upper%
+      - TAB%userid|upper%
+...

@@ -1,0 +1,14 @@
+---
+variable_labels:
+  - {name: display, label: Display Name}
+  - {name: dn, label: Full +E.164 DN}
+  - {name: userid, label: User ID}
+...
+---
+function: updateLine
+arguments:
+  debuginfo: ASCII Alerting %dn%
+  pattern: \%dn%
+  routePartitionName: Internal
+  asciiAlertingName: %display|ascii%
+...

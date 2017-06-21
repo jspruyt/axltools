@@ -1,0 +1,109 @@
+---
+variable_labels:
+  - {name: man, label: Manager User ID}
+  - {name: num, label: Pickup Group Number}
+  - {name: mac, label: MAC Address phone}
+  - {name: display, label: Display Name}
+  - {name: mandisplay, label: Manager Display Name}
+  - {name: site, label: Site code (2/3 characters)}
+  - {name: dn, label: Full +E.164 DN}
+  - {name: mandn, label: Manager +E.164 DN}
+  - {name: userid, label: User ID}
+  - {name: 4digit, label: Last 4 digits of the DN}
+  - {name: part, label: Partition}
+  - {name: manpart, label: Partition}
+...
+---
+function: addCallPickupGroup
+arguments:
+  debuginfo: Call Pickup Group %num%
+  callPickupGroup:
+    description: Manager %man|upper%
+    name: Manager %man|upper%
+    pattern: %num%
+    routePartitionName: Internal
+    pickupNotification: Audio and Visual Alert
+    pickupNotificationTimer: 3
+    callInfoForPickupNotification:
+      callingPartyInfo: t
+      calledPartyInfo: t
+...
+---
+function: updateLine
+arguments:
+  debuginfo: Add Manager Line to Pickup Group
+  pattern: \%mandn%
+  routePartitionName: %manpart%
+  callPickupGroupName: Manager %man|upper%
+...
+---
+function: updateLine
+arguments:
+  debuginfo: Add Assistant Line to Pickup Group
+  pattern: \%dn%
+  routePartitionName: %part%
+  callPickupGroupName: Manager %man|upper%
+...
+---
+function: addPhone
+arguments:
+  debuginfo: SEP%mac|upper%
+  phone:
+    name: SEP%mac|upper%
+    description: "%display%|Deskphone|nomade+"
+    product: Cisco 7841
+    class: Phone
+    protocol: SIP
+    protocolSide: User
+    callingSearchSpaceName: %site%-Device
+    rerouteCallingSearchSpaceName: Line-National
+    softkeyTemplateName: RTBF User
+    devicePoolName: %site%
+    commonDeviceConfigName: RTBF
+    commonPhoneConfigName: RTBF Common Phone Profile
+    locationName: %site%
+    securityProfileName: Universal Device Template - Model-independent Security Profile
+    sipProfileName: Deskphone SIP Profile
+    phoneTemplateName: RTBF 7841 1L 3BLF
+    userLocale: French France
+    networkLocale: Belgium
+    ownerUserName: %userid%
+    builtInBridgeStatus: Default
+    deviceMobilityMode: Default
+    useTrustedRelayPoint: Default
+    packetCaptureMode: None
+    certificateOperation: No Pending Operation
+    primaryPhoneName: NULL
+    lines:
+      line:
+        index: 1
+        display: %display%
+        displayAscii: %display|ascii%
+        label: "%display% - %4digit%"
+        dirn:
+          pattern: \%dn%
+          routePartitionName: %part%
+        busyTrigger: 2
+        associatedEndusers:
+          enduser:
+            userId: %userid%
+    busyLampFields:
+      busyLampField:
+        index: 1
+        label: %manDisplay%
+        blfDest: "%mandn%"
+        associatedBlfSdFeatures:
+          feature: Pickup
+...
+---
+function: updateUser
+arguments:
+  debuginfo: %userid% associated devices
+  userid: %userid%
+  associatedDevices:
+    device: 
+      - SEP%mac|upper%
+      - CSF%userid|upper%
+      - BOT%userid|upper%
+      - TCT%userid|upper%
+...

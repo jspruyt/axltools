@@ -1,0 +1,15 @@
+<html>
+{% include "html_head.html" %}
+<body>
+	<div id="main">
+		{% include "header.html" %}
+		<div class="pure-g">
+			<div class="pure-u-1-1">
+			<div id="content">
+				<ul>{% for tool in tools %}<li class='pure-u-1-4 tools'><a href='{{ tool }}.php'>{{ tool }}</a></li>{% endfor %}</ul>
+			</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

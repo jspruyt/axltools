@@ -1,0 +1,9 @@
+---
+clusters:
+- cluster:
+    name: RTBF
+    host: cucmp1.inf.rtbf.be
+    version: "11.5"
+    user: AXL_tools
+    selected: ""
+...

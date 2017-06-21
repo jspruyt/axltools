@@ -1,0 +1,63 @@
+---
+variable_labels:
+  - {name: first, label: First Name}
+  - {name: last, label: Last Name}
+  - {name: display, label: Display Name}
+  - {name: site, label: Site code (2/3 characters)}
+  - {name: dn, label: Full +E.164 DN}
+  - {name: userid, label: User ID}
+  - {name: cor, label: COR (Internal, National, International)}
+  - {name: vmtemplate, label: Voicemail template name}
+  - {name: 4digit, label: Last 4 digits of the DN}
+...
+---
+function: addDeviceProfile
+arguments:
+  debuginfo: UDP%userid|upper%
+  deviceProfile:
+    name: UDP%userid|upper%
+    description: Device Profile|%display%|nomade
+    product: Cisco 7841
+    class: Device Profile
+    protocol: SIP
+    protocolSide: User
+    securityProfileName: Universal Device Template - Model-independent Security Profile
+    softkeyTemplateName: RTBF User
+    phoneTemplateName: Standard 7841 SIP
+    userLocale: French France
+    lines:
+      line:
+        index: 1
+        display: %display%
+        label: %display% - %4digit% 
+        dirn:
+          pattern: \%dn%
+          routePartitionName: Internal
+        busyTrigger: 1
+        associatedEndusers:
+          enduser:
+            userId: %userid%
+    services:
+      service:
+        telecasterServiceName: Hotdesk
+        name: Logout
+...
+---
+function: updateUser
+arguments:
+  debuginfo: %userid% primary line, devices
+  userid: %userid%
+  primaryExtension: 
+    pattern: \%dn% 
+    routePartitionName: Internal
+  ctiControlledDeviceProfiles:
+    profileName: UDP%userid|upper%
+  associatedDevices:
+    device: 
+      - CSF%userid|upper%
+      - BOT%userid|upper%
+      - TCT%userid|upper%
+  phoneProfiles:
+    profileName: UDP%userid|upper%
+  defaultProfile: UDP%userid|upper%
+...

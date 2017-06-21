@@ -1,0 +1,26 @@
+---
+variable_labels:
+  - {name: first, label: First Name}
+  - {name: last, label: Last Name}
+  - {name: display, label: Display Name}
+  - {name: site, label: Site code (2/3 characters)}
+  - {name: dn, label: Full +E.164 DN}
+  - {name: userid, label: User ID}
+  - {name: cor, label: COR (Internal, National, International)}
+  - {name: vmtemplate, label: Voicemail template name}
+  - {name: 4digit, label: Last 4 digits of the DN}
+...
+---
+function: cupiImportUser
+arguments:
+  debuginfo: %userid% Voicemail Creation
+  alias: %userid%
+  dtmfAccessId: "%dn%"
+...
+---
+function: updateUser
+arguments:
+  debuginfo: %userid% basic settings
+  userid: %userid%
+  pin: %pin%
+...

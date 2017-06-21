@@ -1,0 +1,29 @@
+<script>
+var tid = setInterval(getStatus, 10000);
+
+function getStatus() {
+	//get status via ajax request
+	var xhttp = new XMLHttpRequest();
+	
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 && xhttp.status == 200) {
+			var result = JSON.parse(xhttp.responseText);			
+			updateStatusField(result.message);
+		}
+	};
+	
+	xhttp.open("GET", "ConnectorStatus.php", true);
+	xhttp.send();
+}
+
+function updateStatusField(message) {
+	document.getElementById("statusField").innerHTML = message;
+}
+
+
+function abortTimer() {
+	clearInterval(tid);
+}
+
+getStatus();
+</script>
