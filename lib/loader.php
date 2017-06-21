@@ -1,4 +1,6 @@
 <?php
+	
+	require_once("./lib/config.php");
 	require_once("./lib/functions.php");
 	require_once("./lib/classes/AXLConfig_class.php");
 	require_once("./lib/classes/AXLClient_class.php");
